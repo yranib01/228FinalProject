@@ -27,11 +27,11 @@ def dftodict(df):
 
     return mins_to_range, dt_to_range
 
-range = pandas.read_csv('SproulToVLA.S5.txt', sep='\s+')
+ranges = pandas.read_csv('SproulToVLA.S5.txt', sep='\s+')
 
 s5 = scipy.io.loadmat("s5.mat")
 
 s5 = s5['s5']
 
-ranges_s5 = dftodict(range)
+ranges_s5 = dftodict(ranges)
 

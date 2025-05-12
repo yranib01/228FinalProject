@@ -12,11 +12,13 @@ class CustomDataset(torch.utils.data.Dataset):
             "labels": torch.tensor(self.y[idx], dtype=torch.float)
         }
 
+        return sample
+
     def __len__(self):
         return len(self.x)
 
 
-my_dataset = CustomDataset(split, ys)
+my_dataset = CustomDataset(split, ys_interp)
 
 train_data, val_data = torch.utils.data.random_split(my_dataset, [0.8, 0.2])
 
