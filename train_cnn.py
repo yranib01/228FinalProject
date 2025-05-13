@@ -1,10 +1,19 @@
-import cnn
-from cnn import *
+from cnn import MyCNN
+from tv_split import *
 
-# device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+import torch
+
+cnn = MyCNN().to(device)
+import torch.nn as nn
+import torch.optim as optim
+
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 criterion = nn.MSELoss()
-optimizer = optim.SGD(cnn.parameters(), lr=0.001, momentum=0.3)
+optimizer = optim.SGD(cnn.parameters(), lr=0.0001, momentum=0.2)
+
+# train_data = train_data.to(device)
+# val_data = val_data.to(device)
 
 trainloader = torch.utils.data.DataLoader(train_data, batch_size=5, shuffle=True)
 valloader = torch.utils.data.DataLoader(val_data, batch_size=2, shuffle=True)

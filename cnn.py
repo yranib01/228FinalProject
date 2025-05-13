@@ -7,16 +7,16 @@ from tv_split import *
 class MyCNN(nn.Module):
     def __init__(self):
         super(MyCNN, self).__init__()
-        self.conv1 = nn.Conv1d(21, 1, 3, bias=True)
-        self.lin_final = nn.Linear(7498, 1, bias=True)
-        self.activation_final = nn.LeakyReLU()
+        self.conv1 = nn.Conv1d(21, 1, 1500, bias=True)
+        self.lin_final = nn.Linear(6001, 1, bias=True)
+        # self.activation_final = nn.LeakyReLU()
 
     def forward(self, x):
         conv_out = self.conv1(x)
         lin_out = self.lin_final(conv_out)
-        relu_out = self.activation_final(lin_out)
+        # relu_out = self.activation_final(lin_out)
 
-        return relu_out
+        return lin_out
 
 class TestNet(nn.Module):
     def __init__(self):
@@ -26,7 +26,6 @@ class TestNet(nn.Module):
     def forward(self, x):
         return self.conv1(x)
 
-cnn = MyCNN()
 
 # mynet = TestNet()
 # mycnn = MyCNN()

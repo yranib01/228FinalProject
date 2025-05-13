@@ -1,6 +1,8 @@
 from load_dataset import *
 import torch
 
+device = "cuda" if torch.cuda.is_available() else "cpu"
+
 class CustomDataset(torch.utils.data.Dataset):
     def __init__(self, x, y):
         self.x = x
@@ -17,6 +19,8 @@ class CustomDataset(torch.utils.data.Dataset):
     def __len__(self):
         return len(self.x)
 
+split = torch.Tensor(np.array(split)).to(device)
+ys_interp = torch.Tensor(ys_interp).to(device)
 
 my_dataset = CustomDataset(split, ys_interp)
 
