@@ -2,12 +2,28 @@ from loaddata import *
 
 import numpy as np
 
+
 len_s = 5
 total_samples = s5.shape[0]
 num_cuts =int(total_samples / (f_samp * len_s))
 
+biases = np.mean(s5, axis=0)
+
+s5 -= biases
+
+trim_start_idx = 4.2e6
+
+idxs = np.arange(trim_start_idx, s5.shape[0], f_samp * len_s)
+
+times = [idxtot(idx) for idx in idxs]
+
+trim_end_idx = None
+s5_trimmed = s5[trim_start_idx:, :]
+
 split = np.array_split(s5, num_cuts)
 split = [arr.T for arr in split]
+
+
 
 ys = ranges["Range(km)"][:-2].to_numpy(dtype=float)
 xp = np.arange(0, len(ys) * (60 // len_s), 60 // len_s) # evenly spaced x-values corresponding to the 1-minute range values

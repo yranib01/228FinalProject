@@ -1,6 +1,7 @@
 import scipy.io
 import datetime
 import pandas
+import numpy as np
 
 f_samp = 1500
 
@@ -32,6 +33,8 @@ ranges = pandas.read_csv('SproulToVLA.S5.txt', sep='\s+')
 s5 = scipy.io.loadmat("s5.mat")
 
 s5 = s5['s5']
+
+
 
 ranges_s5 = dftodict(ranges)
 

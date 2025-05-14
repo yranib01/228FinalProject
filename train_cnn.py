@@ -1,9 +1,10 @@
-from cnn import MyCNN
+from cnn import MyCNN, BigCNN
 from tv_split import *
 
 import torch
 
-cnn = MyCNN().to(device)
+# cnn = MyCNN().to(device)
+cnn = BigCNN().to(device)
 import torch.nn as nn
 import torch.optim as optim
 
@@ -20,7 +21,7 @@ valloader = torch.utils.data.DataLoader(val_data, batch_size=2, shuffle=True)
 
 trainloader = trainloader
 
-for epoch in range(60):
+for epoch in range(15):
     print(epoch)
     total_loss = 0
     for data in trainloader:
@@ -43,5 +44,10 @@ for epoch in range(60):
         optimizer.step()
 
     print(total_loss)
+
+
+validation_sample = next(iter(valloader))
+val_data = validation_sample["features"]
+val_labels = validation_sample["labels"]
 
 
