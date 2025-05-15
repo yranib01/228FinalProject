@@ -37,7 +37,7 @@ class BigCNN(nn.Module):
 
         return lin_out
 
-
+# 380-390hz is good
 
 # mynet = TestNet()
 # mycnn = MyCNN()
