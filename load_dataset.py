@@ -1,6 +1,7 @@
 from loaddata import *
 
 import numpy as np
+import scipy.fft as fft
 
 
 len_s = 5
@@ -11,7 +12,7 @@ biases = np.mean(s5, axis=0)
 
 s5 -= biases
 
-trim_start_idx = 4.2e6
+trim_start_idx = 0
 
 idxs = np.arange(trim_start_idx, s5.shape[0], f_samp * len_s)
 
@@ -22,6 +23,8 @@ s5_trimmed = s5[trim_start_idx:, :]
 
 split = np.array_split(s5, num_cuts)
 split = [arr.T for arr in split]
+
+split_fft = [fft.fft((split_window), axis=1) for split_window in split]
 
 
 

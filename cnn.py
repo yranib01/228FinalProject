@@ -37,6 +37,25 @@ class BigCNN(nn.Module):
 
         return lin_out
 
+class FourierCNN(nn.Module):
+    def __init__(self):
+        super(BigCNN, self).__init__()
+        self.conv1 = nn.Conv1d(42, 10, 1500, stride=100, bias=True)
+        self.mp = nn.MaxPool1d(4, stride=3)
+        self.conv1_activation = nn.LeakyReLU()
+        self.conv2 = nn.Conv1d(10, 1, 10, bias=True)
+        self.conv2_activation = nn.LeakyReLU()
+        self.lin_final = nn.Linear(7, 1, bias=True)
+        # self.activation_final = nn.LeakyReLU()
+
+    def forward(self, x):
+        conv_out = self.conv1(x)
+        mp_out = self.conv1_activation(self.mp(conv_out))
+        conv2_out = self.conv2_activation(self.conv2(mp_out))
+        lin_out = self.lin_final(conv2_out)
+
+        return lin_out
+
 # 380-390hz is good
 
 # mynet = TestNet()
