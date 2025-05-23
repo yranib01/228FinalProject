@@ -1,53 +1,36 @@
-from cnn import MyCNN, BigCNN
-from tv_split import *
-
 import torch
+from cnn import BigCNN
+from tv_split import train_set, val_set, device
 
-# cnn = MyCNN().to(device)
-cnn = BigCNN().to(device)
-import torch.nn as nn
-import torch.optim as optim
+# model     = MyCNN().to(device)
+model     = BigCNN().to(device);
+# print(model)
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+criterion = torch.nn.MSELoss()
+optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)  # momentum=0.2?
 
-criterion = nn.MSELoss()
-optimizer = optim.SGD(cnn.parameters(), lr=0.0001, momentum=0.2)
+trainloader = torch.utils.data.DataLoader(train_set, batch_size=16, shuffle=True)
+valloader = torch.utils.data.DataLoader(val_set, batch_size=64)
 
-# train_data = train_data.to(device)
-# val_data = val_data.to(device)
-
-trainloader = torch.utils.data.DataLoader(train_data, batch_size=5, shuffle=True)
-valloader = torch.utils.data.DataLoader(val_data, batch_size=2, shuffle=True)
-
-trainloader = trainloader
-
-for epoch in range(15):
-    print(epoch)
-    total_loss = 0
-    for data in trainloader:
-
+for epoch in range(30):
+    # print(epoch)
+    model.train()
+    running_loss, n_train = 0.0, 0
+    for batch in trainloader:
+        inputs = batch['features'].to(device)
+        labels = batch['labels'].to(device).squeeze(-1)   # (B, )
+        
         optimizer.zero_grad()
-
-        inputs, labels = data['features'], data['labels']
-
-        outputs = cnn(inputs).squeeze()
+        outputs = model(inputs).squeeze(-1)         # (B, )
         loss = criterion(outputs, labels)
         loss.backward()
-
-        total_loss += loss.item()
-
-        # print(loss)
-
-        # if torch.sum(torch.isnan(loss)) > 0:
-        #     print("nan found!")
-
         optimizer.step()
+        
+        running_loss += loss.item() * inputs.size(0)   # total loss
+        n_train += inputs.size(0)                      # total number of samples
+    
+    train_loss = running_loss / n_train
+    # train_loss = running_loss / len(trainloader)
 
-    print(total_loss)
-
-
-validation_sample = next(iter(valloader))
-val_data = validation_sample["features"]
-val_labels = validation_sample["labels"]
-
-
+    print(f"Epoch {epoch:02d} | train {train_loss:8.3f}")
+    # print(f"Epoch {epoch:02d}  train_loss: {running/len(trainloader):.4f}")
