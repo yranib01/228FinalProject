@@ -1,15 +1,15 @@
 import torch, matplotlib.pyplot as plt
-from cnn import DeepCNN
-from tv_split import train_raw, val_raw, train_deep, val_deep, device
+from cnn import *
+from tv_split import train_raw, val_raw, train_deep, val_deep, train_fft, val_fft, device
 
-def run_training(train_set, val_set, label):
+def run_training(train_set, val_set, model, label):
     loader_tr = torch.utils.data.DataLoader(train_set, batch_size=16, shuffle=True)
     loader_va = torch.utils.data.DataLoader(val_set,   batch_size=64)
-    model = DeepCNN().to(device)
-    optim = torch.optim.Adam(model.parameters(), lr=8e-4)
+    model = model.to(device)
+    optim = torch.optim.Adam(model.parameters(), lr=18e-4)
     crit  = torch.nn.MSELoss()
     rmse_hist = []
-    for epoch in range(150):
+    for epoch in range(225):
         # ---- train ----
         model.train(); tr_loss, n=0,0
         for batch in loader_tr:
@@ -31,13 +31,17 @@ def run_training(train_set, val_set, label):
         print(f"{label} | epoch {epoch:02d}  val RMSE {rmse:6.3f}")
     return rmse_hist
 
-# rmse_raw  = run_training(train_raw,  val_raw,  "RAW ")
-rmse_deep = run_training(train_deep, val_deep, "DEEP")
+rmse_raw  = run_training(train_raw,  val_raw, DeepCNN(), "RAW")
+rmse_deep  = run_training(train_deep,  val_deep, DeepCNN(), "DEEP")
+rmse_fft = run_training(train_fft, val_fft, SpectralCNN(), "FFT")
 
+#%%
 # ------------ 그래프 비교 Graph Comparison -------------
-# plt.plot(rmse_raw,  label='Raw input')
+plt.plot(rmse_raw,  label='Raw input')
 plt.plot(rmse_deep, label='Deep-tone BP input')
+plt.plot(rmse_fft, label="FFT Selected Coefficients")
 plt.xlabel('Epoch'); plt.ylabel('Val RMSE [km]')
 plt.legend(); plt.tight_layout()
-plt.savefig("rmse_deepcnn_compare.png", dpi=300)
-print("Saved → rmse_compare.png")
+plt.show()
+plt.savefig("rmse_spectralcnn_compare.png", dpi=300)
+# print("Saved → rmse_compare.png")

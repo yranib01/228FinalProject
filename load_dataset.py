@@ -7,12 +7,12 @@ load_dataset.py
 X.shape == (N_WINDOWS, N_SEONSORS =21, N_SAMPLES_PER_WINDOW = 7500)
 y.shape == (N_WINDOWS, 1)    # float
 """
-
 import numpy as np
 import loaddata as ld
 import scipy.fft as fft
 import matplotlib.pyplot as plt
-from preprocessing import deep_bandpass
+from preprocessing import *
+
 
 # 1) parameters
 LEN_S    = 5 # length in Seconds => how many seconds per window(processing data per one time)
@@ -32,6 +32,7 @@ s5_trim       = s5[:n_windows * SAMP_WIN]    # For cutting the last window / # 6
 # -> for slicing the last window 0 ~ n_windows * SAMP_WIN live, rest is cut
 windows = np.array_split(s5_trim, n_windows, axis=0) # list[(7500, 21)]
 X_raw = np.stack([w.T for w in windows])  # (n_win(now 900), 21, 7500)
+X_raw_fft = np.fft.rfft(X_raw, axis=2)
 X_deep = deep_bandpass(X_raw) # (900, 21, 7500) # deep bandpass filter
 
 # # ======================================================================
@@ -86,7 +87,10 @@ X_deep = deep_bandpass(X_raw) # (900, 21, 7500) # deep bandpass filter
 range_vals = ld.range_df["Range(km)"].dropna().to_numpy(np.float32) # (900,)
 offset_sec = START_CUT / ld.F_SAMP   # offset_sec(signal's 0s location) = 0
 xp_minutes = np.arange(len(range_vals)) * 60  # [0, 60, 120, ..., 900*60] seconds
-x_windows = np.arange(n_windows) * LEN_S #[0, 5, 10, ..., 900*5] seconds 
+x_windows = np.arange(n_windows) * LEN_S #[0, 5, 10, ..., 900*5] seconds
+
+X_fft_selected_freqs = fft_bandpass(X_raw_fft, DEEP_TONES)
+X_fft_coeffs = complex_to_mag_angle(X_fft_selected_freqs)
 
 y = np.interp(x_windows, xp_minutes, range_vals).reshape(-1,1).astype(np.float32) # (900, 1) -> 1D
 
@@ -95,3 +99,9 @@ y = np.interp(x_windows, xp_minutes, range_vals).reshape(-1,1).astype(np.float32
 # =======================================
 # X.shape == (900, 21, 7500)
 # y.shape == (900, 1)    # float
+
+if __name__ == "__main__":
+    np.savez("X_deep", X_deep)
+    np.savez("X_raw", X_raw)
+    np.savez("X_fft_selected", X_fft_coeffs)
+    np.savez("y_range", y)
