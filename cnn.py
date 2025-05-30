@@ -87,6 +87,105 @@ class SpectralCNN(nn.Module):
 
         return self.lin2(lin_out).squeeze()
 
+class BeamCNN(nn.Module):
+    def __init__(self, activation=nn.LeakyReLU()):
+        super().__init__()
+        self.conv1 = nn.Conv3d(1, 1, [3, 40, 2], bias=True)
+        self.conv2 = nn.Conv2d(1, 4, [5, 10], bias=True)
+        self.lin1 = nn.Linear(8820, 400)
+        self.lin2 = nn.Linear(400, 1)
+        self.lin3 = nn.Linear(50, 1)
+        self.activation = activation
+
+    def forward(self, x):
+        # return self.lin(x)
+        conv1_out = self.activation(self.conv1(x.unsqueeze(1)).squeeze(-1))
+        conv2_out = self.activation(self.conv2(conv1_out))
+        conv2_out_flattened = torch.flatten(conv2_out, start_dim=1)
+        lin_out = self.activation(self.lin1(conv2_out_flattened))
+        # lin2_out = self.activation(self.lin2(lin_out))
+
+        return self.lin2(lin_out).squeeze()
+
+
+class SpectralMLP(nn.Module):
+    def __init__(self, activation=nn.LeakyReLU()):
+        super().__init__()
+        self.lin1 = nn.Linear(8190, 200, bias=True)
+        self.lin2 = nn.Linear(200, 100, bias=True)
+        self.lin3 = nn.Linear(100, 50)
+        self.lin4 = nn.Linear(50, 1)
+        self.activation = activation
+        self.linear = nn.ModuleList([self.lin1, self.lin2, self.lin3, self.lin4])
+
+    def forward(self, x):
+        # return self.lin(x)
+        res = x.flatten(start_dim=1)
+        for idx, module in enumerate(self.linear):
+            res = module(res)
+            if idx < len(self.linear) - 1:
+                res = self.activation(res)
+
+        return res
+
+
+class SpectralConv(nn.Module):
+    def __init__(self, in_channels, out_channels, modes, activation=nn.LeakyReLU()):
+        super().__init__()
+        self.in_channels = in_channels
+        self.out_channels = out_channels
+        self.modes = modes
+
+        self.scale = 1 / (self.in_channels)
+        self.weights = nn.Parameter(self.scale * torch.rand(in_channels, self.out_channels, self.modes, dtype=torch.cfloat))
+
+    def forward(self, x):
+        x_fourier = torch.fft.rfft(x, dim=2)
+
+        out_fourier = torch.zeros(x.shape[0], self.out_channels, x_fourier.shape[2], dtype=torch.cfloat, device=x.device)
+
+        out_fourier[:, :, :self.modes] = torch.einsum('bix,iox->box', (x_fourier[:, :, :self.modes], self.weights))
+
+        return torch.fft.irfft(out_fourier, n=x.shape[2], dim=2)
+
+
+class FourierLayers(nn.Module):
+    def __init__(self, modes, num_layers, activation_func, width=21):
+        super().__init__()
+
+        self.modes = modes
+        self.width = width
+        self.num_layers = num_layers
+        self.activation_func = activation_func
+
+        self.spectral_layers = nn.ModuleList([SpectralConv(width, width, modes) for l in range(num_layers)])
+
+        self.layers = nn.ModuleList([nn.Conv1d(width, width, 800, padding='same') for _ in range(num_layers)])
+
+    def forward(self, x):
+        res = x
+
+        for idx, spectral_layer, layer in zip(range(len(self.layers)), self.spectral_layers, self.layers):
+            spectral_res = spectral_layer(res)
+            # next_t = torch.transpose(next, 1, 2)
+            layer_res = layer(res)
+            # layer_res = torch.transpose(layer_res, 1, 2)
+
+            if idx < len(self.layers) - 1:
+                res = self.activation_func(spectral_res + layer_res)
+
+        return res
+
+
+class FourierNet(nn.Module):
+    def __init__(self, activation_func=nn.LeakyReLU()):
+        super().__init__()
+        self.fourier_layers = FourierLayers(2500, 2, activation_func=activation_func)
+        self.cnn = DeepCNN(activation=activation_func)
+
+    def forward(self, x):
+        filtered = self.fourier_layers(x)
+        return self.cnn(filtered)
 #%%
 
 # mynet = TestNet()

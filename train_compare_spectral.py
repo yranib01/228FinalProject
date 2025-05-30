@@ -1,15 +1,17 @@
 import torch, matplotlib.pyplot as plt
 from cnn import *
 from tv_split import train_raw, val_raw, train_deep, val_deep, train_fft, val_fft, device
+import importlib
 
+#%
 def run_training(train_set, val_set, model, label):
     loader_tr = torch.utils.data.DataLoader(train_set, batch_size=16, shuffle=True)
     loader_va = torch.utils.data.DataLoader(val_set,   batch_size=64)
     model = model.to(device)
-    optim = torch.optim.Adam(model.parameters(), lr=18e-4)
+    optim = torch.optim.Adam(model.parameters(), lr=8e-4)
     crit  = torch.nn.MSELoss()
     rmse_hist = []
-    for epoch in range(225):
+    for epoch in range(1000):
         # ---- train ----
         model.train(); tr_loss, n=0,0
         for batch in loader_tr:
@@ -31,17 +33,33 @@ def run_training(train_set, val_set, model, label):
         print(f"{label} | epoch {epoch:02d}  val RMSE {rmse:6.3f}")
     return rmse_hist
 
+#%%
 rmse_raw  = run_training(train_raw,  val_raw, DeepCNN(), "RAW")
 rmse_deep  = run_training(train_deep,  val_deep, DeepCNN(), "DEEP")
+rmse_deep_sig  = run_training(train_deep,  val_deep, DeepCNN(activation=nn.Sigmoid()), "DEEP Sigmoid")
+#%%
 rmse_fft = run_training(train_fft, val_fft, SpectralCNN(), "FFT")
+rmse_fft_sig = run_training(train_fft, val_fft, SpectralCNN(activation=nn.Sigmoid()), "FFT Sigmoid")
+
+#%%
+# rmse_fft_sig = run_training(train_fft, val_fft, SpectralMLP(activation=nn.LeakyReLU()), "FFT MLP")
+rmse_fourier = run_training(train_deep, val_deep, FourierNet(activation_func=nn.LeakyReLU()), "Fourier")
+
+#%%
+rmse_beamcnn = run_training(train_fft, val_fft, BeamCNN(activation=nn.ReLU()), "BeamCNN")
+
+
 
 #%%
 # ------------ 그래프 비교 Graph Comparison -------------
 plt.plot(rmse_raw,  label='Raw input')
 plt.plot(rmse_deep, label='Deep-tone BP input')
 plt.plot(rmse_fft, label="FFT Selected Coefficients")
+plt.plot(rmse_deep_sig, label='Deep-tone Sigmoid')
+plt.plot(rmse_fft_sig, label="FFT Sigmoid")
+# plt.plot(rmse_fourier, label='Fourier')
 plt.xlabel('Epoch'); plt.ylabel('Val RMSE [km]')
 plt.legend(); plt.tight_layout()
 plt.show()
-plt.savefig("rmse_spectralcnn_compare.png", dpi=300)
+plt.savefig("rmse_all_compare.png", dpi=300)
 # print("Saved → rmse_compare.png")
