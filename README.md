@@ -8,6 +8,7 @@ Final Training Loop and Dependencies:
 * preprocessing.py contains helper functions for preprocessing
 * loaddata.py loads raw data.
 * load_dataset.py calls loaddata.py and preprocessing.py, splits into windows, performs FFT, and saves.
+* tv_split.py splits the dataset into training and validation datasets.
 * train_compare_spectral.py contains all FINAL training loops. RUN THIS FILE. /!\
 
 Other Files (from earlier iterations of coding):
