@@ -1,5 +1,5 @@
 *********************************************************************************************************************************************
-* For non-beamforming methods, run train_compare_spectral.py. All other python files perform various preprocessing tasks or are deprecated. *
+* For non-beamforming methods, run load_dataset.py and then train_compare_spectral.py. All other python files perform various preprocessing tasks or are deprecated. *
 *********************************************************************************************************************************************
 
 /!\ The S5 EXPERIMENT DATA (non-noisy) is too large for GitHub. Please download it from this link:
