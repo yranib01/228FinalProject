@@ -2,7 +2,7 @@
 * For non-beamforming methods, run train_compare_spectral.py. All other python files perform various preprocessing tasks or are deprecated. *
 *********************************************************************************************************************************************
 
-Final Training Loop and Dependencies:
+Final Training Loop and Dependencies:\n
 cnn.py contains all neural network definitions (not just CNNs)
 preprocessing.py contains helper functions for preprocessing
 loaddata.py loads raw data.
