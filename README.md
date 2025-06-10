@@ -2,12 +2,16 @@
 * For non-beamforming methods, run train_compare_spectral.py. All other python files perform various preprocessing tasks or are deprecated. *
 *********************************************************************************************************************************************
 
+/!\ The DATA is too large for GitHub. Please download it from this link:
+https://drive.google.com/file/d/1bCmopIiqDT2-MPvg0TQczaCgK-yaSg7m/view?usp=sharing
+Leave data file s5.mat in the project directory.
+
 Final Training Loop and Dependencies:
 
 * cnn.py contains all neural network definitions (not just CNNs)
 * preprocessing.py contains helper functions for preprocessing
 * loaddata.py loads raw data.
-* load_dataset.py calls loaddata.py and preprocessing.py, splits into windows, performs FFT, and saves.
+* load_dataset.py calls loaddata.py and preprocessing.py, splits into windows, performs FFT, and saves. /!\ RUN THIS FILE before train_compare_spectral.py.
 * tv_split.py splits the dataset into training and validation datasets.
 * SproulToVLA.txt contains range definitions in a tabular format. Please keep for running.
 * train_compare_spectral.py contains all FINAL training loops. RUN THIS FILE. /!\
