@@ -22,10 +22,22 @@ class CustomDataset(torch.utils.data.Dataset):
             "labels": self.y[idx]}
         return sample
 
-X_raw = torch.Tensor(np.load("X_raw.npz")['arr_0']).to(device)
-X_deep = torch.Tensor(np.load("X_deep.npz")['arr_0']).to(device)
-X_fft_selected = torch.Tensor(np.load("X_fft_selected.npz")['arr_0']).to(device)
-y = torch.Tensor(np.load("y_range.npz")['arr_0']).to(device)
+X_raw = np.load("X_raw.npz")['arr_0']
+X_deep = np.load("X_deep.npz")['arr_0']
+X_fft_selected = np.load("X_fft_selected.npz")['arr_0']
+y = np.load("y_range.npz")['arr_0']
+
+banned_indices = [*np.arange(0, 100), *np.arange(698, 715), *np.arange(880, 900)]
+
+X_raw = np.delete(X_raw, banned_indices, axis=0)
+X_deep = np.delete(X_deep, banned_indices, axis=0)
+X_fft_selected = np.delete(X_fft_selected, banned_indices, axis=0)
+y = np.delete(y, banned_indices, axis=0)
+
+X_raw = torch.Tensor(X_raw).to(device)
+X_deep = torch.Tensor(X_deep).to(device)
+X_fft_selected = torch.Tensor(X_fft_selected).to(device)
+y = torch.Tensor(y).to(device)
 
 dataset_raw = CustomDataset(X_raw, y)
 dataset_deep = CustomDataset(X_deep, y)

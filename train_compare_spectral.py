@@ -11,7 +11,7 @@ def run_training(train_set, val_set, model, label):
     optim = torch.optim.Adam(model.parameters(), lr=8e-4)
     crit  = torch.nn.MSELoss()
     rmse_hist = []
-    for epoch in range(1000):
+    for epoch in range(500):
         # ---- train ----
         model.train(); tr_loss, n=0,0
         for batch in loader_tr:
@@ -34,18 +34,19 @@ def run_training(train_set, val_set, model, label):
     return rmse_hist
 
 #%%
+rmse_fft_mlp = run_training(train_fft, val_fft, SpectralMLP(), "FFT")
+rmse_fft_mlp_sig = run_training(train_fft, val_fft, SpectralMLP(activation=nn.Sigmoid()), "FFT Sigmoid")
 rmse_raw  = run_training(train_raw,  val_raw, DeepCNN(), "RAW")
 rmse_deep  = run_training(train_deep,  val_deep, DeepCNN(), "DEEP")
 rmse_deep_sig  = run_training(train_deep,  val_deep, DeepCNN(activation=nn.Sigmoid()), "DEEP Sigmoid")
-#%%
 rmse_fft = run_training(train_fft, val_fft, SpectralCNN(), "FFT")
 rmse_fft_sig = run_training(train_fft, val_fft, SpectralCNN(activation=nn.Sigmoid()), "FFT Sigmoid")
 
-#%%
+
 # rmse_fft_sig = run_training(train_fft, val_fft, SpectralMLP(activation=nn.LeakyReLU()), "FFT MLP")
 rmse_fourier = run_training(train_deep, val_deep, FourierNet(activation_func=nn.LeakyReLU()), "Fourier")
 
-#%%
+
 rmse_beamcnn = run_training(train_fft, val_fft, BeamCNN(activation=nn.ReLU()), "BeamCNN")
 
 
@@ -57,9 +58,12 @@ plt.plot(rmse_deep, label='Deep-tone BP input')
 plt.plot(rmse_fft, label="FFT Selected Coefficients")
 plt.plot(rmse_deep_sig, label='Deep-tone Sigmoid')
 plt.plot(rmse_fft_sig, label="FFT Sigmoid")
-# plt.plot(rmse_fourier, label='Fourier')
+plt.plot(rmse_fourier, label='FNO-Like')
+plt.plot(rmse_beamcnn, label='BeamCNN')
 plt.xlabel('Epoch'); plt.ylabel('Val RMSE [km]')
+
+plt.title("Comparison of Methods")
 plt.legend(); plt.tight_layout()
+plt.savefig("rmse_all_fm_compare_fft_rerun.png", dpi=300)
 plt.show()
-plt.savefig("rmse_all_compare.png", dpi=300)
 # print("Saved → rmse_compare.png")
