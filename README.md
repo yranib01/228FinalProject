@@ -25,5 +25,5 @@ Other Files (from earlier iterations of coding):
 
 
 *********************************************************************************
-For beamforming methods, all code is contained in BF.ipynb. RUN THIS FILE /!\ An animation is in Beamforming UKF.mp4.
+For beamforming methods, all code is contained in BF_v2.ipynb. RUN THIS FILE /!\ An animation is in Beamforming UKF.mp4.
 *********************************************************************************
